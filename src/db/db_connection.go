@@ -9,7 +9,7 @@ import (
 	"gorm.io/gorm"
 )
 
-var POSTGRESDB *gorm.DB
+var DBConn *gorm.DB
 
 func PostgresConnection() {
 
@@ -17,8 +17,8 @@ func PostgresConnection() {
 
 	var err error
 
-	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=require ", config.DB_HOST, config.DB_USER, config.DB_PASSWORD, config.DB_NAME, config.DB_PORT)
-	POSTGRESDB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s search_path=%s sslmode=require ", config.DB_HOST, config.DB_USER, config.DB_PASSWORD, config.DB_NAME, config.DB_PORT, config.DB_SCHEMA)
+	DBConn, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
 
 	if err != nil {
 		log.Fatal("Error trying to connect to the database")

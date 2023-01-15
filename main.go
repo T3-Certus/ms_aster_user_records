@@ -7,6 +7,7 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/joho/godotenv"
 	db_connection "github.com/ssssshel/ms_aster_user_data_go/src/db"
+	users_routes "github.com/ssssshel/ms_aster_user_data_go/src/routes/users"
 )
 
 func main() {
@@ -26,7 +27,8 @@ func main() {
 		return c.SendString("MS User Data")
 	})
 
-	// v1 := app.Group("/v1")
+	v1 := app.Group("/v1")
+	users_routes.Routes(v1)
 
 	app.Listen(":3000")
 }
