@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/joho/godotenv"
 	db_connection "github.com/ssssshel/ms_aster_user_data_go/src/db"
@@ -22,6 +23,8 @@ func main() {
 	db_connection.PostgresConnection()
 
 	app.Use(logger.New())
+
+	app.Use(cors.New())
 
 	app.Get("/", func(c *fiber.Ctx) error {
 		return c.SendString("MS User Data")

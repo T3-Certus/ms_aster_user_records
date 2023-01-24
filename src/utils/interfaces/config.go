@@ -1,4 +1,4 @@
-package interfaces
+package utils_interfaces
 
 type TPostgresConfig struct {
 	DB_NAME     string
