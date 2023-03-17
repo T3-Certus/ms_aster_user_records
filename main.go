@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/gofiber/fiber/v2"
@@ -20,6 +21,35 @@ func main() {
 		log.Fatal("Env error")
 	}
 
+	envConf := Environments()
+
+	if envConf.development {
+		fmt.Println("Running in development mode")
+		initConf(app)
+	}
+
+	if envConf.developmentWithoutTokens {
+		fmt.Println("Running in development mode without tokens")
+		initConf(app)
+	}
+
+	if envConf.testing {
+		fmt.Println("Running in testing mode")
+		initConf(app)
+	}
+
+	if envConf.production {
+		fmt.Println("Running in production mode")
+		initConf(app)
+	}
+
+	if envConf.invalidConfiguration {
+		log.Fatal("Invalid environment configuration")
+	}
+
+}
+
+func initConf(app *fiber.App) {
 	db_connection.PostgresConnection()
 
 	app.Use(logger.New())

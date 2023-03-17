@@ -10,7 +10,7 @@ func Routes(parent fiber.Router) fiber.Router {
 	routesGroup := parent.Group("/users")
 
 	routesGroup.Get("/user-data/:userId", users_controller.HandleGetUserData)
-	// routesGroup.Put("/update-user/:userId")
+	routesGroup.Put("/update-user/:userId", users_controller.HandleUpdateUserData)
 
 	return routesGroup
 
