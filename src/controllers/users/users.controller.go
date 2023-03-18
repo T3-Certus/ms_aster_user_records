@@ -8,6 +8,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	db_connection "github.com/ssssshel/ms_aster_user_data_go/src/db"
 	"github.com/ssssshel/ms_aster_user_data_go/src/models"
+	associations_models "github.com/ssssshel/ms_aster_user_data_go/src/models/associations"
 	"github.com/ssssshel/restponses-go"
 	"github.com/ssssshel/restponses-go/utils"
 	"gorm.io/gorm"
@@ -17,13 +18,16 @@ func HandleGetUserData(c *fiber.Ctx) error {
 	db := db_connection.DBConn
 
 	userId := c.Params("userId")
-	userModel := []models.UserData{}
+	userModel := associations_models.UserData{}
 
-	userChan := make(chan []models.UserData)
+	userChan := make(chan associations_models.UserData)
 	errChan := make(chan error)
 
 	go func() {
-		if err := db.First(&userModel, &userId).Error; err != nil {
+		defer close(userChan)
+		defer close(errChan)
+
+		if err := db.Preload("USER_ROLE").First(&userModel, &userId).Error; err != nil {
 			errChan <- err
 			return
 		}
@@ -35,14 +39,13 @@ func HandleGetUserData(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusOK).JSON(restponses.Response2xxSuccessfull(restponses.Status200Ok, &restponses.BaseSuccessfulInput{Data: user}))
 
 	case err := <-errChan:
-		errString := fmt.Sprintf("%s", err)
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			nfUser := fmt.Sprintf("User with id %s", userId)
 
-			return c.Status(fiber.StatusNotFound).JSON(restponses.Response4xxClientError(restponses.Status404NotFound, &restponses.BaseClientErrorInput{Detail: errString, StatusOptions: utils.Status404Opt(nfUser)}))
+			return c.Status(fiber.StatusNotFound).JSON(restponses.Response4xxClientError(restponses.Status404NotFound, &restponses.BaseClientErrorInput{Detail: err.Error(), StatusOptions: utils.Status404Opt(nfUser)}))
 		}
 
-		return c.Status(fiber.StatusInternalServerError).JSON(restponses.Response5xxServerError(restponses.Status500InternalServerError, &restponses.BaseServerErrorInput{Detail: errString}))
+		return c.Status(fiber.StatusInternalServerError).JSON(restponses.Response5xxServerError(restponses.Status500InternalServerError, &restponses.BaseServerErrorInput{Detail: err.Error()}))
 	}
 
 }
@@ -51,26 +54,19 @@ func HandleUpdateUserData(c *fiber.Ctx) error {
 	db := db_connection.DBConn
 
 	userId := c.Params("userId")
-
 	payload := models.UserData{}
 
-	// payload.id_user_rol = uint(c.Body()["id_user_rol"])
-	// payload.user_cellphone = string(c.Body()["user_cellphone"])
-	// payload.user_document_number = string(c.Body()["user_document_number"])
-	// payload.user_document_type = string(c.Body()["user_document_type"])
-	// payload.user_email = string(c.Body()["user_email"])
-	// payload.user_name = string(c.Body()["user_name"])
-	// payload.user_surname = string(c.Body()["user_surname"])
-
-	userModel := []models.UserData{}
-
-	userChan := make(chan []models.UserData)
+	userChan := make(chan models.UserData)
 	validationsErrorsChan := make(chan error)
 	errChan := make(chan error)
 
 	v := validator.New()
 
 	go func() {
+		defer close(userChan)
+		defer close(validationsErrorsChan)
+		defer close(errChan)
+
 		fmt.Println("payload: ", &payload)
 		if err := c.BodyParser(&payload); err != nil {
 			validationsErrorsChan <- err
@@ -82,6 +78,7 @@ func HandleUpdateUserData(c *fiber.Ctx) error {
 			return
 		}
 
+		userModel := models.UserData{}
 		if err := db.First(&userModel, &userId).Updates(&payload).Error; err != nil {
 			errChan <- err
 			return
@@ -95,14 +92,13 @@ func HandleUpdateUserData(c *fiber.Ctx) error {
 	case err := <-validationsErrorsChan:
 		return c.Status(fiber.StatusBadRequest).JSON(restponses.Response4xxClientError(restponses.Status400BadRequest, &restponses.BaseClientErrorInput{Detail: err.Error()}))
 	case err := <-errChan:
-		errString := fmt.Sprintf("%s", err)
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			nfUser := fmt.Sprintf("User with id %s", userId)
 
-			return c.Status(fiber.StatusNotFound).JSON(restponses.Response4xxClientError(restponses.Status404NotFound, &restponses.BaseClientErrorInput{Detail: errString, StatusOptions: utils.Status404Opt(nfUser)}))
+			return c.Status(fiber.StatusNotFound).JSON(restponses.Response4xxClientError(restponses.Status404NotFound, &restponses.BaseClientErrorInput{Detail: err.Error(), StatusOptions: utils.Status404Opt(nfUser)}))
 		}
 
-		return c.Status(fiber.StatusInternalServerError).JSON(restponses.Response5xxServerError(restponses.Status500InternalServerError, &restponses.BaseServerErrorInput{Detail: errString}))
+		return c.Status(fiber.StatusInternalServerError).JSON(restponses.Response5xxServerError(restponses.Status500InternalServerError, &restponses.BaseServerErrorInput{Detail: err.Error()}))
 	}
 
 }

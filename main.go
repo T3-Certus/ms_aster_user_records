@@ -9,6 +9,7 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/joho/godotenv"
 	db_connection "github.com/ssssshel/ms_aster_user_data_go/src/db"
+	orders_routes "github.com/ssssshel/ms_aster_user_data_go/src/routes/orders"
 	users_routes "github.com/ssssshel/ms_aster_user_data_go/src/routes/users"
 )
 
@@ -62,6 +63,7 @@ func initConf(app *fiber.App) {
 
 	v1 := app.Group("/v1")
 	users_routes.Routes(v1)
+	orders_routes.Routes(v1)
 
 	app.Listen(":3000")
 }
