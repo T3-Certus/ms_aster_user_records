@@ -18,3 +18,8 @@ func PostgresConfig() *utils_interfaces.TPostgresConfig {
 
 	return values
 }
+
+func ATKey() string {
+	key := os.Getenv("ACCESS_TOKEN_PRIVATE_KEY")
+	return key
+}

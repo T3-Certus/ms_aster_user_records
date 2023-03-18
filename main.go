@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/gofiber/fiber/v2"
@@ -9,6 +8,7 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/joho/godotenv"
 	db_connection "github.com/ssssshel/ms_aster_user_data_go/src/db"
+	"github.com/ssssshel/ms_aster_user_data_go/src/middlewares"
 	orders_routes "github.com/ssssshel/ms_aster_user_data_go/src/routes/orders"
 	users_routes "github.com/ssssshel/ms_aster_user_data_go/src/routes/users"
 )
@@ -22,40 +22,20 @@ func main() {
 		log.Fatal("Env error")
 	}
 
-	envConf := Environments()
-
-	if envConf.development {
-		fmt.Println("Running in development mode")
-		initConf(app)
-	}
-
-	if envConf.developmentWithoutTokens {
-		fmt.Println("Running in development mode without tokens")
-		initConf(app)
-	}
-
-	if envConf.testing {
-		fmt.Println("Running in testing mode")
-		initConf(app)
-	}
-
-	if envConf.production {
-		fmt.Println("Running in production mode")
-		initConf(app)
-	}
-
-	if envConf.invalidConfiguration {
-		log.Fatal("Invalid environment configuration")
-	}
+	Environments(app, development)
 
 }
 
-func initConf(app *fiber.App) {
+func defaultInitConf(app *fiber.App, tokenization bool) {
 	db_connection.PostgresConnection()
 
 	app.Use(logger.New())
 
 	app.Use(cors.New())
+
+	if tokenization {
+		app.Use(middlewares.VerifyAccessToken)
+	}
 
 	app.Get("/", func(c *fiber.Ctx) error {
 		return c.SendString("MS User Data")

@@ -1,50 +1,40 @@
 package main
 
-const (
-	development = iota + 1
-	testing
-	production
-	developmentWithoutTokens // DO NOT USE IN PRODUCTION
+import (
+	"fmt"
+	"log"
+
+	"github.com/gofiber/fiber/v2"
 )
 
-type envConfigurations struct {
-	development              bool
-	testing                  bool
-	developmentWithoutTokens bool
-	production               bool
-	invalidConfiguration     bool
-}
+type env uint
 
-func Environments() *envConfigurations {
-	// edita esto si deseas cambiar la configuracion
-	env := development
+const (
+	development              env = 1
+	testing                  env = 2
+	production               env = 3
+	developmentWithoutTokens env = 4 // DO NOT USE THIS IN PRODUCTION
+)
 
-	envConfigurations := &envConfigurations{
-		development:              false,
-		developmentWithoutTokens: false,
-		testing:                  false,
-		production:               false,
-		invalidConfiguration:     false,
-	}
+func Environments(app *fiber.App, env env) {
 
 	if env > 0 && env < 5 {
 		switch env {
 		case development:
-			envConfigurations.development = true
-			return envConfigurations
+			fmt.Println("Running in development mode")
+			defaultInitConf(app, true)
 		case testing:
-			envConfigurations.testing = true
-			return envConfigurations
+			fmt.Println("Running in testing mode")
+			defaultInitConf(app, true)
 		case production:
-			envConfigurations.production = true
-			return envConfigurations
+			fmt.Println("Running in production mode")
+			defaultInitConf(app, true)
 		case developmentWithoutTokens:
-			envConfigurations.developmentWithoutTokens = true
-			return envConfigurations
+			fmt.Println("Running in development mode without tokens")
+			defaultInitConf(app, false)
 		}
 	}
 
-	envConfigurations.invalidConfiguration = true
-	return envConfigurations
+	log.Fatal("Invalid environment configuration")
 
 }
