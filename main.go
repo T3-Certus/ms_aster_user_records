@@ -33,15 +33,15 @@ func defaultInitConf(app *fiber.App, tokenization bool) {
 
 	app.Use(cors.New())
 
-	if tokenization {
+	if !tokenization {
 		app.Use(middlewares.VerifyAccessToken)
 	}
 
 	app.Get("/", func(c *fiber.Ctx) error {
-		return c.SendString("MS User Data")
+		return c.SendString("MS User Records")
 	})
 
-	v1 := app.Group("/v1")
+	v1 := app.Group("/v2")
 	users_routes.Routes(v1)
 	orders_routes.Routes(v1)
 

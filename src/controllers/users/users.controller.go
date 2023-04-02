@@ -18,7 +18,6 @@ func HandleGetUserData(c *fiber.Ctx) error {
 	db := db_connection.DBConn
 
 	userId := c.Params("userId")
-	userModel := associations_models.UserData{}
 
 	userChan := make(chan associations_models.UserData)
 	errChan := make(chan error)
@@ -26,8 +25,9 @@ func HandleGetUserData(c *fiber.Ctx) error {
 	go func() {
 		defer close(userChan)
 		defer close(errChan)
+		userModel := associations_models.UserData{}
 
-		if err := db.Preload("USER_ROLE").First(&userModel, &userId).Error; err != nil {
+		if err := db.Preload("USER_ROLE").WithContext(c.Context()).First(&userModel, &userId).Error; err != nil {
 			errChan <- err
 			return
 		}
@@ -43,9 +43,9 @@ func HandleGetUserData(c *fiber.Ctx) error {
 			nfUser := fmt.Sprintf("User with id %s", userId)
 
 			return c.Status(fiber.StatusNotFound).JSON(restponses.Response4xxClientError(restponses.Status404NotFound, &restponses.BaseClientErrorInput{Detail: err.Error(), StatusOptions: utils.Status404Opt(nfUser)}))
+		} else {
+			return c.Status(fiber.StatusInternalServerError).JSON(restponses.Response5xxServerError(restponses.Status500InternalServerError, &restponses.BaseServerErrorInput{Detail: err.Error()}))
 		}
-
-		return c.Status(fiber.StatusInternalServerError).JSON(restponses.Response5xxServerError(restponses.Status500InternalServerError, &restponses.BaseServerErrorInput{Detail: err.Error()}))
 	}
 
 }

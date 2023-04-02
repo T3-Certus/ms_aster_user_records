@@ -1,0 +1,38 @@
+name: CaproverDeploy
+
+env:
+  CAPROVER_APP: ms-aster-user-records-production
+  DOCKER_REGISTRY_URL: docker.io
+  REGISTRY_PREFIX: ssssshel/asterisks_images
+
+on:
+  push:
+    branches: [master]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Build and push docker image
+        env:
+          DOCKER_REGISTRY_USER: ${{ secrets.DOCKER_REGISTRY_USER }}
+          DOCKER_REGISTRY_PASSWORD: ${{ secrets.DOCKER_REGISTRY_PASSWORD }}
+          DOCKER_REGISTRY_URL: ${{ env.DOCKER_REGISTRY_URL }}
+          CAPROVER_URL: ${{ secrets.CAPROVER_URL }}
+          CAPROVER_PASSWORD: ${{ secrets.CAPROVER_PASSWORD }}
+          CAPROVER_APP: ${{ env.CAPROVER_APP }}
+          REGISTRY_PREFIX: ${{ env.REGISTRY_PREFIX }}
+        run: |
+          echo "Building..."
+          COMMIT_HASH=$(echo $GITHUB_SHA | cut -c1-7)
+          REPO_NAME=$(basename $GITHUB_REPOSITORY)
+          RAW_CONTAINER_FULL_IMAGE_NAME_WITH_TAG="$REGISTRY_PREFIX:$REPO_NAME-$COMMIT_HASH"
+          CONTAINER_FULL_IMAGE_NAME_WITH_TAG=$(echo "$RAW_CONTAINER_FULL_IMAGE_NAME_WITH_TAG" | tr '[:upper:]' '[:lower:]')
+          docker build -f ./Dockerfile --pull -t built-image-name .
+          docker tag built-image-name "$CONTAINER_FULL_IMAGE_NAME_WITH_TAG"
+          docker login -u "$DOCKER_REGISTRY_USER" -p "$DOCKER_REGISTRY_PASSWORD" $DOCKER_REGISTRY_URL
+          docker push "$CONTAINER_FULL_IMAGE_NAME_WITH_TAG"
+          echo $CONTAINER_FULL_IMAGE_NAME_WITH_TAG
+          echo "Deploying on CapRover..."
+          docker run caprover/cli-caprover:v2.1.1 caprover deploy --caproverUrl $CAPROVER_URL --caproverPassword $CAPROVER_PASSWORD --caproverApp $CAPROVER_APP --imageName $CONTAINER_FULL_IMAGE_NAME_WITH_TAG
