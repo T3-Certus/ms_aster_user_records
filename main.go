@@ -46,4 +46,5 @@ func defaultInitConf(app *fiber.App, tokenization bool) {
 	orders_routes.Routes(v1)
 
 	app.Listen(":3000")
+
 }
