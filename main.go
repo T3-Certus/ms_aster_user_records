@@ -1,12 +1,9 @@
 package main
 
 import (
-	"log"
-
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/logger"
-	"github.com/joho/godotenv"
 	db_connection "github.com/ssssshel/ms_aster_user_data_go/src/db"
 	"github.com/ssssshel/ms_aster_user_data_go/src/middlewares"
 	orders_routes "github.com/ssssshel/ms_aster_user_data_go/src/routes/orders"
@@ -16,14 +13,7 @@ import (
 func main() {
 	app := fiber.New()
 
-	err := godotenv.Load(".env")
-
-	if err != nil {
-		log.Fatal("Error loading .env file: %s", err)
-	}
-
-	Environments(app, development)
-
+	EnvironmentsManager(app, production)
 }
 
 func defaultInitConf(app *fiber.App, tokenization bool) {
