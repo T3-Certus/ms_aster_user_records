@@ -41,9 +41,9 @@ func defaultInitConf(app *fiber.App, tokenization bool) {
 		return c.SendString("MS User Records")
 	})
 
-	v1 := app.Group("/v2")
-	users_routes.Routes(v1)
-	orders_routes.Routes(v1)
+	v := app.Group("/v2")
+	users_routes.Routes(v)
+	orders_routes.Routes(v)
 
 	app.Listen(":3000")
 
