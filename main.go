@@ -16,10 +16,10 @@ import (
 func main() {
 	app := fiber.New()
 
-	err := godotenv.Load()
+	err := godotenv.Load(".env")
 
 	if err != nil {
-		log.Fatal("Env error")
+		log.Fatal("Error loading .env file")
 	}
 
 	Environments(app, development)
