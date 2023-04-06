@@ -22,8 +22,7 @@ func defaultInitConf(app *fiber.App, tokenization bool) {
 
 	app.Use(cors.New())
 
-	// quitar !, solo para pruebas
-	if !tokenization {
+	if tokenization {
 		app.Use(middlewares.VerifyAccessToken)
 	}
 

@@ -17,7 +17,7 @@ func createRoutes(router fiber.Router, version config.APIVersion) fiber.Router {
 		return routesGroup
 
 	case config.V2:
-		routesGroup.Get("/user/:userId", users_controller.HandleGetUserDataNoThreads)
+		routesGroup.Get("/user/:userId", users_controller.HandleGetUserData)
 		routesGroup.Put("/user/:userId", users_controller.HandleUpdateUserData)
 		return routesGroup
 

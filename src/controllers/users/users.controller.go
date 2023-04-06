@@ -49,26 +49,27 @@ func HandleGetUserData(c *fiber.Ctx) error {
 	}
 
 }
-func HandleGetUserDataNoThreads(c *fiber.Ctx) error {
-	db := db_connection.DBConn
 
-	userId := c.Params("userId")
+// func HandleGetUserDataNoThreads(c *fiber.Ctx) error {
+// 	db := db_connection.DBConn
 
-	userModel := associations_models.UserData{}
+// 	userId := c.Params("userId")
 
-	if err := db.Preload("USER_ROLE").WithContext(c.Context()).First(&userModel, &userId).Error; err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			nfUser := fmt.Sprintf("User with id %s", userId)
+// 	userModel := associations_models.UserData{}
 
-			return c.Status(fiber.StatusNotFound).JSON(restponses.Response4xxClientError(restponses.Status404NotFound, &restponses.BaseClientErrorInput{Detail: err.Error(), StatusOptions: utils.Status404Opt(nfUser)}))
-		} else {
-			return c.Status(fiber.StatusInternalServerError).JSON(restponses.Response5xxServerError(restponses.Status500InternalServerError, &restponses.BaseServerErrorInput{Detail: err.Error()}))
-		}
-	} else {
-		return c.Status(fiber.StatusOK).JSON(restponses.Response2xxSuccessfull(restponses.Status200Ok, &restponses.BaseSuccessfulInput{Data: userModel}))
-	}
+// 	if err := db.Preload("USER_ROLE").WithContext(c.Context()).First(&userModel, &userId).Error; err != nil {
+// 		if errors.Is(err, gorm.ErrRecordNotFound) {
+// 			nfUser := fmt.Sprintf("User with id %s", userId)
 
-}
+// 			return c.Status(fiber.StatusNotFound).JSON(restponses.Response4xxClientError(restponses.Status404NotFound, &restponses.BaseClientErrorInput{Detail: err.Error(), StatusOptions: utils.Status404Opt(nfUser)}))
+// 		} else {
+// 			return c.Status(fiber.StatusInternalServerError).JSON(restponses.Response5xxServerError(restponses.Status500InternalServerError, &restponses.BaseServerErrorInput{Detail: err.Error()}))
+// 		}
+// 	} else {
+// 		return c.Status(fiber.StatusOK).JSON(restponses.Response2xxSuccessfull(restponses.Status200Ok, &restponses.BaseSuccessfulInput{Data: userModel}))
+// 	}
+
+// }
 
 func HandleUpdateUserData(c *fiber.Ctx) error {
 	db := db_connection.DBConn
