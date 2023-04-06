@@ -6,14 +6,13 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	db_connection "github.com/ssssshel/ms_aster_user_data_go/src/db"
 	"github.com/ssssshel/ms_aster_user_data_go/src/middlewares"
-	orders_routes "github.com/ssssshel/ms_aster_user_data_go/src/routes/orders"
 	users_routes "github.com/ssssshel/ms_aster_user_data_go/src/routes/users"
 )
 
 func main() {
 	app := fiber.New()
 
-	EnvironmentsManager(app, production)
+	EnvironmentsManager(app, developmentWithoutTokens)
 }
 
 func defaultInitConf(app *fiber.App, tokenization bool) {
@@ -23,7 +22,7 @@ func defaultInitConf(app *fiber.App, tokenization bool) {
 
 	app.Use(cors.New())
 
-	if !tokenization {
+	if tokenization {
 		app.Use(middlewares.VerifyAccessToken)
 	}
 
@@ -31,9 +30,12 @@ func defaultInitConf(app *fiber.App, tokenization bool) {
 		return c.SendString("MS User Records")
 	})
 
-	v := app.Group("/v2")
-	users_routes.Routes(v)
-	orders_routes.Routes(v)
+	v1 := app.Group("/v1")
+	v2 := app.Group("/v2")
+
+	users_routes.RouteBuilderV1(v1)
+	users_routes.RouteBuilderV2(v2)
+	// orders_routes.Routes(v)
 
 	app.Listen(":3000")
 

@@ -23,3 +23,10 @@ func ATKey() string {
 	key := os.Getenv("ACCESS_TOKEN_PRIVATE_KEY")
 	return key
 }
+
+type APIVersion uint
+
+const (
+	V1 APIVersion = 1
+	V2 APIVersion = 2
+)
