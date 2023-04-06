@@ -12,7 +12,7 @@ import (
 func main() {
 	app := fiber.New()
 
-	EnvironmentsManager(app, developmentWithoutTokens)
+	EnvironmentsManager(app, production)
 }
 
 func defaultInitConf(app *fiber.App, tokenization bool) {
@@ -22,7 +22,8 @@ func defaultInitConf(app *fiber.App, tokenization bool) {
 
 	app.Use(cors.New())
 
-	if tokenization {
+	// quitar !, solo para pruebas
+	if !tokenization {
 		app.Use(middlewares.VerifyAccessToken)
 	}
 
